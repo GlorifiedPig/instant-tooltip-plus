@@ -48,7 +48,11 @@ local function force_hide_tooltips()
         gui.upgr_info:Reset()
         gui.upgr_info:Show(false)
         gui.hint_wnd.txt = nil
-        gui.hint_wnd.timer = get_time()
+
+        if get_time then
+            gui.hint_wnd.timer = get_time()
+        end
+        
         gui.hint_wnd:Show(false)
     end
 
