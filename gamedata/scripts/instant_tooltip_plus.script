@@ -17,19 +17,22 @@ local function update_delays()
     delay = ( hidden and not inverted or not hidden and inverted ) and hidden_delay or shown_delay
 
     if ui_inventory and ui_inventory.GUI then
-        ui_inventory.GUI.item_info.delay = delay
-        ui_inventory.GUI.upgr_info.delay = delay
+        local gui = ui_inventory.GUI
+        if gui.item_info then gui.item_info.delay = delay end
+        if gui.upgr_info then gui.upgr_info.delay = delay end
     end
 
     if ui_itm_details and ui_itm_details.GUI then
-        ui_itm_details.GUI.item_info.delay = delay
-        ui_itm_details.GUI.upgr_info.delay = delay
-        ui_itm_details.GUI.hint_wnd.delay = delay
+        local gui = ui_itm_details.GUI
+        if gui.item_info then gui.item_info.delay = delay end
+        if gui.upgr_info then gui.upgr_info.delay = delay end
+        if gui.hint_wnd then gui.hint_wnd.delay = delay end
     end
 
     if ui_workshop and ui_workshop.GUI then
-        ui_workshop.GUI.item_info.delay = delay
-        ui_workshop.GUI.upgr_info.delay = delay
+        local gui = ui_workshop.GUI
+        if gui.item_info then gui.item_info.delay = delay end
+        if gui.upgr_info then gui.upgr_info.delay = delay end
     end
 end
 
@@ -37,38 +40,30 @@ end
 local function force_hide_tooltips()
     if ui_inventory and ui_inventory.GUI then
         local gui = ui_inventory.GUI
-        gui.item_info:Reset()
-        gui.item_info:Show(false)
-        gui.upgr_info:Reset()
-        gui.upgr_info:Show(false)
+        if gui.item_info and gui.item_info.Reset and gui.item_info.Show then gui.item_info:Reset() ; gui.item_info:Show(false) end
+        if gui.upgr_info and gui.upgr_info.Reset and gui.upgr_info.Show then gui.upgr_info:Reset() ; gui.upgr_info:Show(false) end
     end
 
     if ui_itm_details and ui_itm_details.GUI then
         local gui = ui_itm_details.GUI
-        gui.item_info:Reset()
-        gui.item_info:Show(false)
-        gui.upgr_info:Reset()
-        gui.upgr_info:Show(false)
-        gui.hint_wnd.txt = nil
-
-        if get_time then
-            gui.hint_wnd.timer = get_time()
+        if gui.item_info and gui.item_info.Reset and gui.item_info.Show then gui.item_info:Reset() ; gui.item_info:Show(false) end
+        if gui.upgr_info and gui.upgr_info.Reset and gui.upgr_info.Show then gui.upgr_info:Reset() ; gui.upgr_info:Show(false) end
+        if gui.hint_wnd and gui.hint_wnd.Show then
+            gui.hint_wnd.txt = nil
+            if get_time then gui.hint_wnd.timer = get_time() end
+            gui.hint_wnd:Show(false)
         end
-
-        gui.hint_wnd:Show(false)
     end
 
     if ui_workshop and ui_workshop.GUI then
         local gui = ui_workshop.GUI
-        gui.item_info:Reset()
-        gui.item_info:Show(false)
-        gui.upgr_info:Reset()
-        gui.upgr_info:Show(false)
+        if gui.item_info and gui.item_info.Reset and gui.item_info.Show then gui.item_info:Reset() ; gui.item_info:Show(false) end
+        if gui.upgr_info and gui.upgr_info.Reset and gui.upgr_info.Show then gui.upgr_info:Reset() ; gui.upgr_info:Show(false) end
     end
 end
 
 local function gui_on_show( name )
-    if not ( name ~= "UIInventory" or name ~= "UIItemSheet" or name ~= "UIWorkshop" ) then return end -- Only do this on inventory, Item Sheet and Workshop UI.
+    if name ~= "UIInventory" and name ~= "UIItemSheet" and name ~= "UIWorkshop" then return end -- Only do this on inventory, Item Sheet and Workshop UI.
 
     update_delays()
 end
@@ -79,7 +74,9 @@ local function on_key_press( key )
 
         local sEnabled = inverted and "Hidden by Default" or "Shown by Default"
 
-        news_manager.send_tip(db.actor, "Tooltips " .. sEnabled, nil, nil, 4000)
+        if news_manager and db and db.actor then
+            news_manager.send_tip(db.actor, "Tooltips " .. sEnabled, nil, nil, 4000)
+        end
 
         update_delays()
 
