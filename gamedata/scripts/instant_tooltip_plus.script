@@ -6,13 +6,15 @@
 local hide_keybind = DIK_keys.DIK_LCONTROL -- What is the button to hide tooltips?
 local shown_delay = 0 -- What should the delay be when the tooltips are shown?
 local hidden_delay = math.huge -- What should the delay be when the hide keybind is pressed?
+local toggle_invert = DIK_keys.DIK_RCONTROL -- What is the button to toggle the inversion of the tooltips?
+local inverted = false -- If this is set to true, tooltips will be hidden by default and shown when the hide keybind is pressed.
 
 -- Logic
 local hidden = false
 local delay = hidden and hidden_delay or shown_delay
 
 local function update_delays()
-    delay = hidden and hidden_delay or shown_delay
+    delay = ( hidden and not inverted or not hidden and inverted ) and hidden_delay or shown_delay
 
     if ui_inventory and ui_inventory.GUI then
         ui_inventory.GUI.item_info.delay = delay
@@ -52,7 +54,7 @@ local function force_hide_tooltips()
         if get_time then
             gui.hint_wnd.timer = get_time()
         end
-        
+
         gui.hint_wnd:Show(false)
     end
 
@@ -72,16 +74,40 @@ local function gui_on_show( name )
 end
 
 local function on_key_press( key )
-    if key ~= hide_keybind then return end
-    hidden = true
-    update_delays()
-    force_hide_tooltips()
+    if key == toggle_invert then
+        inverted = not inverted
+
+        local sEnabled = inverted and "Hidden by Default" or "Shown by Default"
+
+        news_manager.send_tip(db.actor, "Tooltips " .. sEnabled, nil, nil, 4000)
+
+        update_delays()
+
+        if inverted then
+            force_hide_tooltips()
+        end
+    end
+
+    if key == hide_keybind then
+        hidden = true
+        update_delays()
+
+        if not inverted then
+            force_hide_tooltips()
+        end
+    end
 end
 
 local function on_key_release( key )
-    if key ~= hide_keybind then return end
-    hidden = false
-    update_delays()
+    if key == hide_keybind then
+        hidden = false
+
+        update_delays()
+
+        if inverted then
+            force_hide_tooltips()
+        end
+    end
 end
 
 function on_game_start()
